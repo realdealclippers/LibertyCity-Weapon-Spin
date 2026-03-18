@@ -1,90 +1,209 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Liberty City RP Spin</title>
-  <style>
-    body {
-      background: #111;
-      color: white;
-      text-align: center;
-      font-family: Arial;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberty City Weapon Stats</title>
+    <style>
+        /* BASE STYLING */
+        body {
+            background-color: #050505;
+            color: #d1d1d1;
+            font-family: 'Inter', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 40px 20px;
+            user-select: none;
+        }
 
-    h1 { margin-top: 20px; }
+        h1 { color: #a855f7; margin-bottom: 0; font-weight: 400; letter-spacing: 1px; }
+        h2 { color: #9333ea; font-size: 1.1rem; margin-top: 5px; font-weight: 300; }
+        p { color: #888; font-size: 0.9rem; margin-bottom: 20px; }
 
-    #wheel {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      border: 6px solid white;
-      margin: 30px auto;
-      transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
-      background: conic-gradient(
-        #555 0% 20%,
-        #1e90ff 20% 40%,
-        #32cd32 40% 60%,
-        #ff8c00 60% 80%,
-        gold 80% 100%
-      );
-    }
+        /* SIDEBAR BUTTONS SIMULATION */
+        .sidebar {
+            position: absolute;
+            left: 20px;
+            top: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-    button {
-      padding: 12px 25px;
-      font-size: 18px;
-      border: none;
-      background: gold;
-      cursor: pointer;
-    }
+        .side-btn {
+            background: #1a1a1a;
+            color: #a855f7;
+            border: 1px solid #3b0764;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 80px;
+            text-align: center;
+        }
 
-    #result {
-      margin-top: 20px;
-      font-size: 22px;
-    }
-  </style>
+        /* THE SPINNER BOX */
+        .spinner-container {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 140px;
+            background: #111;
+            border: 2px solid #222;
+            overflow: hidden;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 20px #000;
+        }
+
+        /* THE YELLOW CENTER LINE */
+        .center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #eab308; /* Yellow Indicator */
+            z-index: 100;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+        }
+
+        /* THE MOVING ROW */
+        .weapon-row {
+            display: flex;
+            position: absolute;
+            left: 0;
+            top: 15px;
+            transition: transform 6s cubic-bezier(0.1, 0, 0.1, 1); /* Realistic spin physics */
+        }
+
+        .item-box {
+            min-width: 110px;
+            height: 110px;
+            background: #1a1a1a;
+            margin: 0 5px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .item-box img {
+            width: 85px;
+            height: auto;
+            opacity: 0.9;
+        }
+
+        /* BUTTONS */
+        .spin-control {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        select {
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .spin-btn {
+            background: #1a1a1a;
+            color: #f97316; /* Orange button */
+            border: 1px solid #9a3412;
+            padding: 8px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .spin-btn:hover { background: #9a3412; color: #fff; }
+
+    </style>
 </head>
 <body>
 
-<h1>🎡 Liberty City RP Gun Spin</h1>
+    <div class="sidebar">
+        <div class="side-btn">Show T1</div>
+        <div class="side-btn">Show T1.5</div>
+        <div class="side-btn">Show T2</div>
+        <div class="side-btn">Drugs</div>
+    </div>
 
-<div id="wheel"></div>
+    <h1>Liberty City Weapon Stats</h1>
+    <h2>Randomize</h2>
+    <p>Simulate a faction drop spin</p>
 
-<button onclick="spin()">SPIN</button>
+    <div class="spinner-container">
+        <div class="center-line"></div>
+        <div id="weapon-row" class="weapon-row">
+            <!-- Weapons injected by JS -->
+        </div>
+    </div>
 
-<p id="result"></p>
+    <div class="spin-control">
+        <label>Choose Tier:</label>
+        <select id="tierSelect">
+            <option>Test Drops</option>
+            <option>Tier 1</option>
+            <option>Tier 2</option>
+        </select>
+        <button class="spin-btn" onclick="startSpin()">Spin</button>
+    </div>
 
-<script>
-const rewards = [
-  {name: "Nothing", weight: 40},
-  {name: "Glock", weight: 25},
-  {name: "SMG", weight: 20},
-  {name: "Draco", weight: 10},
-  {name: "Switch", weight: 5}
-];
+    <script>
+        // REPLACE THESE WITH YOUR ACTUAL LIBERTY CITY GUN IMAGES
+        const weaponImages = [
+            "https://cdn-icons-png.flaticon.com", // Pistol
+            "https://cdn-icons-png.flaticon.com", // SMG
+            "https://cdn-icons-png.flaticon.com", // AK
+            "https://cdn-icons-png.flaticon.com"  // Shotgun
+        ];
 
-function weightedRandom() {
-  let total = rewards.reduce((sum, r) => sum + r.weight, 0);
-  let rand = Math.random() * total;
+        const row = document.getElementById('weapon-row');
+        const boxWidth = 122; // width + margin
 
-  for (let r of rewards) {
-    if (rand < r.weight) return r.name;
-    rand -= r.weight;
-  }
-}
+        function initItems() {
+            row.innerHTML = '';
+            // We create 100 items so the spin feels long
+            for (let i = 0; i < 100; i++) {
+                const randomImg = weaponImages[Math.floor(Math.random() * weaponImages.length)];
+                const div = document.createElement('div');
+                div.className = 'item-box';
+                div.innerHTML = `<img src="${randomImg}">`;
+                row.appendChild(div);
+            }
+        }
 
-function spin() {
-  let wheel = document.getElementById("wheel");
+        function startSpin() {
+            // Reset position instantly
+            row.style.transition = "none";
+            row.style.transform = "translateX(0)";
+            
+            // Wait a tiny bit then spin
+            setTimeout(() => {
+                const spinCount = 70 + Math.floor(Math.random() * 10); // How many items to skip
+                const extraPixel = Math.floor(Math.random() * 100); // Randomize landing spot within the box
+                const totalMove = (spinCount * boxWidth) - (window.innerWidth / 2) + (boxWidth / 2) + extraPixel;
 
-  let result = weightedRandom();
-  let randomDeg = 360 * 6 + Math.floor(Math.random() * 360);
+                row.style.transition = "transform 6s cubic-bezier(0.1, 0, 0.1, 1)";
+                row.style.transform = `translateX(-${totalMove}px)`;
+            }, 50);
+        }
 
-  wheel.style.transform = `rotate(${randomDeg}deg)`;
-
-  setTimeout(() => {
-    document.getElementById("result").innerText =
-      "You got: " + result;
-  }, 4000);
-}
-</script>
-
+        // Run on load
+        initItems();
+    </script>
 </body>
 </html>
+
